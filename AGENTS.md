@@ -112,8 +112,13 @@ Same as Warframe TODO Tracker:
 ## Known gotchas
 
 - Fastmail MCP tools use either "folders" or "labels" mode — Iris assumes folders mode
-- Hermes cron jobs in recurring mode need careful idempotency — don't brief the same emails twice
-- Discord doesn't render markdown tables — briefs must use code blocks or bullet lists
-- The `search_email` tool has a `receivedAt` field — use `after`/`before` with relative dates for time-window queries
-- Draft emails via MCP go to the Drafts folder; the user sends them manually through Fastmail UI
-- Hermes memory has a character limit (~2,200 chars) — Iris preferences must be compact
+- **Fastmail MCP cannot create folders** — use the Archive folder for triage by default. If the user wants a separate "Iris Briefed" folder, they must create it manually in the Fastmail web UI, then update iris-inbox to use `update_email(folder="Iris Briefed")` instead of `archive_email`.
+- Hermes cron jobs in recurring mode need careful idempotency — don't brief the same emails twice. Track `Iris: last brief` and `Iris: last triage` timestamps in memory.
+- Discord doesn't render markdown tables — briefs must use emoji section headers (📰 📦 🔔) and `•` bullet lists. Max ~1800 chars per message (Discord limit is 2000).
+- The `search_email` tool has a `receivedAt` field — use `after`/`before` with relative dates for time-window queries. Always use time windows, never search the full inbox (can have thousands of emails).
+- Draft emails via MCP go to the Drafts folder; the user sends them manually through Fastmail UI. Never use any send capability.
+- **Hermes memory budget**: ~2,200 chars. Iris entries must stay under ~90 chars each. Use pipes as delimiters, no spaces between fields. Consolidate entries when approaching limit — one `memory(operations=[...])` batch call is safer than multiple `add` calls.
+- **Voice detection > self-reporting**: Auto-detect writing voice from sent mail (search "from:me in:sent", read 3-5 bodies) rather than asking the user to describe their style. Self-reported style is unreliable — real emails are the ground truth.
+- **Skills are tested by running against real data**, not unit tests. After creating a skill, do a dry run against actual Fastmail data to verify correctness before committing.
+- **GitHub project board API** requires explicit field/option IDs for status changes — the `gh project item-edit` syntax differs between user projects and org projects. Prefer closing issues via `Closes #N` in commits for automatic board movement.
+- **GH CLI label creation**: Labels must exist before using them in `gh issue create --label`. If a label is missing, create it first or use an existing one.
