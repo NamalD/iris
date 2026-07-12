@@ -86,6 +86,9 @@ hermes run "generate my email brief using iris-brief"
 
 # Manually triage inbox
 hermes run "triage my inbox using iris-inbox"
+
+# Sweep historical backlog in interactive batches of 50
+hermes run "sweep my inbox backlog using iris-inbox"
 ```
 
 ## Commit conventions
